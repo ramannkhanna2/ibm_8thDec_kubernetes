@@ -90,3 +90,41 @@ rm -rf "${TMPDIR}"
 
 echo "Bootstrap complete. Next: run kubeadm init on control-plane or kubeadm join on worker with --cri-socket unix:///var/run/cri-dockerd.sock"
 
+
+
+
+
+2. Create a config file on master node (vi config.yaml) :
+
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: 172.31.10.17    # <--- set to your master node Private IP Address
+  bindPort: 6443
+nodeRegistration:
+  criSocket: unix:///var/run/cri-dockerd.sock
+---
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: ClusterConfiguration
+kubernetesVersion: v1.33.5
+networking:
+  podSubnet: 10.10.0.0/16
+
+
+
+
+
+3. Initialize the cluster (master node):
+
+sudo kubeadm init --config=config.yaml >> cluster_initialized.txt
+
+
+-- run below commands on master node :
+
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+
+
+
